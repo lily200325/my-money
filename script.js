@@ -103,7 +103,20 @@ function addItem() {
     
     if (text) {
         const items = getItems();
-        items.push(text);
+        const now = new Date();
+        const timestamp = now.toLocaleString('zh-CN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        items.push({
+            text: text,
+            timestamp: timestamp
+        });
+        
         saveItems(items);
         loadItems();
         document.getElementById('modal').style.display = 'none';
@@ -129,8 +142,11 @@ function loadItems() {
     items.forEach((item, index) => {
         const li = document.createElement('li');
         li.innerHTML = `
-            <span>${item}</span>
-            <button class="delete-btn" onclick="deleteItem(${index})">×</button>
+            <div class="item-content">
+                <span>${item.text || item}</span>
+                <button class="delete-btn" onclick="deleteItem(${index})">×</button>
+            </div>
+            ${item.timestamp ? `<span class="timestamp">${item.timestamp}</span>` : ''}
         `;
         list.appendChild(li);
     });
@@ -146,7 +162,7 @@ function updatePreviews() {
         // 只显示前3个项目
         items.slice(0, 3).forEach(item => {
             const li = document.createElement('li');
-            li.textContent = item;
+            li.textContent = item.text || item;
             preview.appendChild(li);
         });
     });

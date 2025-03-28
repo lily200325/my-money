@@ -98,10 +98,16 @@ h1 {
 
 #items-list li {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
     padding: 10px;
     border-bottom: 1px solid #eee;
+}
+
+#items-list li .item-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
 }
 
 .delete-btn {
@@ -189,4 +195,11 @@ h1 {
         width: 95%;
         margin: 30% auto;
     }
+}
+
+.timestamp {
+    color: #999;
+    font-size: 0.8em;
+    margin-top: 5px;
+    display: block;
 }

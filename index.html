@@ -108,10 +108,16 @@
 
         #items-list li {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
             padding: 10px;
             border-bottom: 1px solid #eee;
+        }
+
+        #items-list li .item-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
         }
 
         #items-list li .delete-btn {
@@ -208,6 +214,14 @@
             margin: 0 10px;
         }
 
+        .timestamp {
+            color: #999;
+            font-size: 0.8em;
+            margin-top: 5px;
+            display: block;
+        }
+
+        /* 响应式设计 */
         @media (max-width: 768px) {
             .cards-grid {
                 grid-template-columns: 1fr;
@@ -398,9 +412,25 @@
             
             if (text) {
                 const items = getItems(currentCategory);
-                items.push(text);     // 添加到末尾
-                saveItems(currentCategory, items);
+                if (currentCategory === 'moments') {
+                    const now = new Date();
+                    const timestamp = now.toLocaleString('zh-CN', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    
+                    items.push({
+                        text: text,
+                        timestamp: timestamp
+                    });
+                } else {
+                    items.push(text);
+                }
                 
+                saveItems(currentCategory, items);
                 document.getElementById('modal').style.display = 'none';
                 loadItems();
                 updatePreviews();
@@ -425,8 +455,11 @@
             items.forEach((item, index) => {
                 const li = document.createElement('li');
                 li.innerHTML = `
-                    <span>${item}</span>
-                    <button class="delete-btn" onclick="deleteItem(${index})">×</button>
+                    <div class="item-content">
+                        <span>${typeof item === 'object' ? item.text : item}</span>
+                        <button class="delete-btn" onclick="deleteItem(${index})">×</button>
+                    </div>
+                    ${currentCategory === 'moments' && item.timestamp ? `<span class="timestamp">${item.timestamp}</span>` : ''}
                 `;
                 list.appendChild(li);
             });
@@ -444,7 +477,7 @@
                 
                 items.slice(-3).forEach(item => {  // 显示最后三条记录
                     const li = document.createElement('li');
-                    li.textContent = item;
+                    li.textContent = item.text || item;
                     preview.appendChild(li);
                 });
             });
