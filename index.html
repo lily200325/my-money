@@ -308,6 +308,20 @@
         </div>
     </div>
 
+    <!-- 导出数据弹窗 -->
+    <div id="export-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="document.getElementById('export-modal').style.display='none'">&times;</span>
+            <h2>导出数据</h2>
+            <p style="margin-bottom: 10px;">请复制以下内容并保存为 .json 文件：</p>
+            <textarea id="export-data" style="width: 100%; height: 200px; margin-bottom: 10px; padding: 10px;" readonly></textarea>
+            <div class="modal-buttons">
+                <button onclick="copyExportData()">复制内容</button>
+                <button onclick="document.getElementById('export-modal').style.display='none'">关闭</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentCategory = '';
 
@@ -320,7 +334,15 @@
             localStorage.setItem(category, JSON.stringify(items));
         }
 
-        // 导出数据函数需要修改
+        // 添加复制功能
+        function copyExportData() {
+            const textarea = document.getElementById('export-data');
+            textarea.select();
+            document.execCommand('copy');
+            alert('内容已复制到剪贴板');
+        }
+
+        // 修改导出数据函数
         function exportData() {
             const data = {
                 ways: getItems('ways'),
@@ -328,19 +350,10 @@
                 moments: getItems('moments')
             };
             
-            // 创建一个隐藏的下载链接
-            const a = document.createElement('a');
-            // 使用 base64 编码替代 Blob URL
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
-            a.href = dataStr;
-            a.download = 'my-money-data.json';
-            
-            // 添加到文档中并触发点击
-            document.body.appendChild(a);
-            a.click();
-            
-            // 清理
-            document.body.removeChild(a);
+            const exportModal = document.getElementById('export-modal');
+            const exportData = document.getElementById('export-data');
+            exportData.value = JSON.stringify(data, null, 2);
+            exportModal.style.display = 'block';
         }
 
         // 导入数据函数需要修改
