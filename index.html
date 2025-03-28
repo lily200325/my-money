@@ -17,7 +17,8 @@
     <meta name="theme-color" content="#ffffff">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="My Soul">
+    <!-- 修改 meta 标签 -->
+    <meta name="apple-mobile-web-app-title" content="My Money">
     <style>
         * {
             margin: 0;
@@ -319,26 +320,25 @@
             localStorage.setItem(category, JSON.stringify(items));
         }
 
-        // 导出数据
+        // 导出数据函数需要修改
         function exportData() {
             const data = {
-                wants: getItems('wants'),
-                likes: getItems('likes'),
-                hates: getItems('hates'),
-                tries: getItems('tries')
+                ways: getItems('ways'),
+                lists: getItems('lists'),
+                moments: getItems('moments')
             };
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'my-soul-data.json';
+            a.download = 'my-money-data.json';  // 修改文件名
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }
 
-        // 导入数据
+        // 导入数据函数需要修改
         function importData(event) {
             const file = event.target.files[0];
             if (file) {
@@ -346,7 +346,7 @@
                 reader.onload = function(e) {
                     try {
                         const data = JSON.parse(e.target.result);
-                        ['wants', 'likes', 'hates', 'tries'].forEach(category => {
+                        ['ways', 'lists', 'moments'].forEach(category => {  // 修改类别
                             if (Array.isArray(data[category])) {
                                 saveItems(category, data[category]);
                             }
@@ -359,6 +359,46 @@
                 };
                 reader.readAsText(file);
             }
+        }
+
+        // 更新预览函数需要修改
+        function updatePreviews() {
+            const categories = ['ways', 'lists', 'moments'];  // 修改类别
+            
+            categories.forEach(category => {
+                let previewId;
+                if (category === 'ways') {
+                    previewId = 'ways-preview';
+                } else if (category === 'lists') {
+                    previewId = 'likes-preview';
+                } else if (category === 'moments') {
+                    previewId = 'hates-preview';
+                }
+                
+                const items = getItems(category);
+                const preview = document.getElementById(previewId);
+                if (preview) {
+                    preview.innerHTML = '';
+                    items.slice(-3).forEach(item => {
+                        const li = document.createElement('li');
+                        li.textContent = typeof item === 'object' ? item.text : item;
+                        preview.appendChild(li);
+                    });
+                }
+            });
+        }
+
+        // Service Worker 注册需要修改
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/my-money/service-worker.js')  // 修改路径
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful');
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
         }
 
         // 显示二级页面
@@ -462,24 +502,6 @@
                     ${currentCategory === 'moments' && item.timestamp ? `<span class="timestamp">${item.timestamp}</span>` : ''}
                 `;
                 list.appendChild(li);
-            });
-        }
-
-        // 更新主页面预览
-        function updatePreviews() {
-            const categories = ['wants', 'likes', 'hates', 'tries'];
-            
-            categories.forEach(category => {
-                const items = getItems(category);
-                
-                const preview = document.getElementById(`${category}-preview`);
-                preview.innerHTML = '';
-                
-                items.slice(-3).forEach(item => {  // 显示最后三条记录
-                    const li = document.createElement('li');
-                    li.textContent = item.text || item;
-                    preview.appendChild(li);
-                });
             });
         }
 
