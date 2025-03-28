@@ -258,6 +258,20 @@
         </div>
 
         <div class="cards-grid">
+            <div class="card" onclick="showSecondPage('now')">
+                <h2>now</h2>
+                <div class="card-preview">
+                    <ul id="now-preview"></ul>
+                </div>
+            </div>
+
+            <div class="card" onclick="showSecondPage('principle')">
+                <h2>principle</h2>
+                <div class="card-preview">
+                    <ul id="principle-preview"></ul>
+                </div>
+            </div>
+
             <div class="card" onclick="showSecondPage('ways')">
                 <h2>ways</h2>
                 <div class="card-preview">
@@ -345,6 +359,8 @@
         // 修改导出数据函数
         function exportData() {
             const data = {
+                now: getItems('now'),
+                principle: getItems('principle'),
                 ways: getItems('ways'),
                 lists: getItems('lists'),
                 moments: getItems('moments')
@@ -364,7 +380,7 @@
                 reader.onload = function(e) {
                     try {
                         const data = JSON.parse(e.target.result);
-                        ['ways', 'lists', 'moments'].forEach(category => {  // 修改类别
+                        ['now', 'principle', 'ways', 'lists', 'moments'].forEach(category => {  // 修改类别
                             if (Array.isArray(data[category])) {
                                 saveItems(category, data[category]);
                             }
@@ -381,11 +397,15 @@
 
         // 更新预览函数需要修改
         function updatePreviews() {
-            const categories = ['ways', 'lists', 'moments'];  // 修改类别
+            const categories = ['now', 'principle', 'ways', 'lists', 'moments'];  // 修改类别
             
             categories.forEach(category => {
                 let previewId;
-                if (category === 'ways') {
+                if (category === 'now') {
+                    previewId = 'now-preview';
+                } else if (category === 'principle') {
+                    previewId = 'principle-preview';
+                } else if (category === 'ways') {
                     previewId = 'ways-preview';
                 } else if (category === 'lists') {
                     previewId = 'likes-preview';
@@ -426,6 +446,8 @@
             document.getElementById('second-page').style.display = 'block';
             
             const titles = {
+                now: 'now',
+                principle: 'principle',
                 ways: 'ways',
                 lists: 'lists',
                 moments: 'moments'
