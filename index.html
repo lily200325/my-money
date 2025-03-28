@@ -245,6 +245,17 @@
                 justify-content: center;
             }
         }
+
+        .item-text {
+            cursor: pointer;
+            padding: 5px;
+            flex-grow: 1;
+        }
+        
+        .item-text:hover {
+            background-color: #f5f5f5;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
@@ -314,10 +325,10 @@
     <div id="modal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <h2>添加新项目</h2>
+            <h2 id="modal-title">添加新项目</h2>
             <input type="text" id="item-input" placeholder="输入内容">
             <div class="modal-buttons">
-                <button onclick="addItem()">保存</button>
+                <button onclick="saveItem()">保存</button>
             </div>
         </div>
     </div>
@@ -338,6 +349,7 @@
 
     <script>
         let currentCategory = '';
+        let editingIndex = -1; // 添加编辑索引变量
 
         // 数据操作函数
         function getItems(category) {
@@ -465,11 +477,17 @@
         }
 
         // 打开弹窗
-        function openModal() {
+        function openModal(index = -1, text = '') {
             const modal = document.getElementById('modal');
+            const modalTitle = document.getElementById('modal-title');
+            const input = document.getElementById('item-input');
+            
+            editingIndex = index;
+            modalTitle.textContent = index === -1 ? '添加新项目' : '编辑项目';
+            input.value = text;
+            
             modal.style.display = 'block';
-            document.getElementById('item-input').value = '';
-            document.getElementById('item-input').focus();
+            input.focus();
         }
 
         // 关闭弹窗
@@ -485,29 +503,40 @@
             }
         }
 
-        // 添加项目
-        function addItem() {
+        // 保存项目（新增或编辑）
+        function saveItem() {
             const input = document.getElementById('item-input');
             const text = input.value.trim();
             
             if (text) {
                 const items = getItems(currentCategory);
-                if (currentCategory === 'moments') {
-                    const now = new Date();
-                    const timestamp = now.toLocaleString('zh-CN', {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
-                    
-                    items.push({
-                        text: text,
-                        timestamp: timestamp
-                    });
+                
+                if (editingIndex === -1) {
+                    // 添加新项目
+                    if (currentCategory === 'moments') {
+                        const now = new Date();
+                        const timestamp = now.toLocaleString('zh-CN', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                        
+                        items.push({
+                            text: text,
+                            timestamp: timestamp
+                        });
+                    } else {
+                        items.push(text);
+                    }
                 } else {
-                    items.push(text);
+                    // 编辑现有项目
+                    if (currentCategory === 'moments') {
+                        items[editingIndex].text = text;
+                    } else {
+                        items[editingIndex] = text;
+                    }
                 }
                 
                 saveItems(currentCategory, items);
@@ -534,9 +563,11 @@
             
             items.forEach((item, index) => {
                 const li = document.createElement('li');
+                const itemText = typeof item === 'object' ? item.text : item;
+                
                 li.innerHTML = `
                     <div class="item-content">
-                        <span>${typeof item === 'object' ? item.text : item}</span>
+                        <span class="item-text" onclick="openModal(${index}, '${itemText.replace(/'/g, "\\'")}')">${itemText}</span>
                         <button class="delete-btn" onclick="deleteItem(${index})">×</button>
                     </div>
                     ${currentCategory === 'moments' && item.timestamp ? `<span class="timestamp">${item.timestamp}</span>` : ''}
