@@ -327,15 +327,20 @@
                 lists: getItems('lists'),
                 moments: getItems('moments')
             };
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
+            
+            // 创建一个隐藏的下载链接
             const a = document.createElement('a');
-            a.href = url;
-            a.download = 'my-money-data.json';  // 修改文件名
+            // 使用 base64 编码替代 Blob URL
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
+            a.href = dataStr;
+            a.download = 'my-money-data.json';
+            
+            // 添加到文档中并触发点击
             document.body.appendChild(a);
             a.click();
+            
+            // 清理
             document.body.removeChild(a);
-            URL.revokeObjectURL(url);
         }
 
         // 导入数据函数需要修改
